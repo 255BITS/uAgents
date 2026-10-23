@@ -11,10 +11,14 @@ This system elegantly bifurcates into two agents:
 
 🛠 **Requirements**
 
-- Python (v3.10+ preferred for optimal performance)
+- Python 3.11.17 or a newer security release in the 3.11 series
 - Poetry (A dynamic Python packaging and dependency management tool)
 
 **Key Libraries:** Ensure your environment is configured with `HUGGING_FACE_ACCESS_TOKEN`.
+
+This agent streams image bytes to disk without decoding them. Pillow is not
+required; the dependency and lockfile omit its native decoders. The reviewed
+lockfile includes certifi 2026.10.19 for the emSign certificate incident.
 
 ✨ **Features**
 
