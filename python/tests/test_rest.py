@@ -250,7 +250,9 @@ async def test_rest_post_fail_invalid_response():
 
 
 @pytest.mark.order(6)
-async def test_rest_wrong_client():
+async def test_rest_remote_client():
+    # This fork intentionally exposes registered REST routes to remote clients
+    # (7ec7947, "remove forbidden"); message signature verification is separate.
     @agent.on_rest_get("/get-wrong-client", Response)
     async def _(_ctx: Context):
         return Response(text="Hi there!")
@@ -273,11 +275,11 @@ async def test_rest_wrong_client():
             call(
                 {
                     "type": "http.response.start",
-                    "status": 403,
+                    "status": 200,
                     "headers": [[b"content-type", b"application/json"]],
                 }
             ),
-            call({"type": "http.response.body", "body": b'{"error": "forbidden"}'}),
+            call({"type": "http.response.body", "body": b'{"text": "Hi there!"}'}),
         ]
     )
 
