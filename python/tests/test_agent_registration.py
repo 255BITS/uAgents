@@ -3,6 +3,7 @@ import hashlib
 import json
 import unittest
 from typing import Any, Dict, List
+from unittest.mock import patch
 
 from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
@@ -141,9 +142,18 @@ class TestRegistration(unittest.IsolatedAsyncioTestCase):
         if not name_service_contract.address:
             self.fail("Name service contract address is invalid")
 
-        tx = name_service_contract.get_registration_tx(
-            agent.name, agent.wallet.address(), agent.address, "example.agent", True
-        )
+        def contract_query(query):
+            if query == {"domain_record": {"domain": f"{agent.name}.example.agent"}}:
+                return {"is_available": True}
+            self.assertEqual(query, {"contract_state": {}})
+            return {"price_per_second": {"amount": "100000000000", "denom": "atestfet"}}
+
+        with patch.object(
+            name_service_contract, "query_contract", side_effect=contract_query
+        ):
+            tx = name_service_contract.get_registration_tx(
+                agent.name, agent.wallet.address(), agent.address, "example.agent", True
+            )
 
         if not tx:
             self.fail("Name service registration TX is invalid")
