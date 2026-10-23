@@ -1,0 +1,30 @@
+name: Image integration security
+on:
+  pull_request:
+    paths:
+      - integrations/stable-diffusion-v1-4/**
+      - .github/workflows/image-integration.yml
+  push:
+    branches: [main]
+    paths:
+      - integrations/stable-diffusion-v1-4/**
+      - .github/workflows/image-integration.yml
+permissions:
+  contents: read
+jobs:
+  image-stream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: integrations/stable-diffusion-v1-4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.17"
+      - run: python -m pip install poetry
+      - run: poetry check --lock
+      - run: poetry sync --no-root
+      - run: poetry run python -m pip check
+      - run: poetry run python -m unittest discover -s tests -v
